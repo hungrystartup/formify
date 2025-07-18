@@ -243,7 +243,7 @@ app.post("/submit/:apikey", async (req, res) => {
 
         // Redirect logic
         if (user.status === 0) {
-            return res.redirect("http://localhost:3000/thanks.html");
+            return res.redirect("https://formify.bluhorizon.work/thanks.html");
         }
 
         if (user.status === 1 && _redirect) {
@@ -359,4 +359,4 @@ app.get("/api/message-stats", verifyToken, async (req, res) => {
 
 app.use(express.static('public'));
 
-app.listen(port, () => console.log(`Connection started on port: http://localhost:${port}`));
+app.listen(port, () => console.log(`Connection started on port:${port}`));
