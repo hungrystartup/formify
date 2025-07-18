@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
-require('dotenv').config();
-const port = process.env.PORT;
+// require('dotenv').config();
+// const port = process.env.PORT;
 app.use(express.json());
 
 // const cors = require('cors');
@@ -358,20 +358,22 @@ app.use(express.json());
 // });
 
 // app.use(express.static('public'));
-
-try {
-  app.listen(port, () => {
+app.listen(port, () => {
     console.log(`✅ Server running on port ${port}`);
   });
-} catch (err) {
-  console.error("❌ Error starting server:", err);
-}
+// try {
+//   app.listen(port, () => {
+//     console.log(`✅ Server running on port ${port}`);
+//   });
+// } catch (err) {
+//   console.error("❌ Error starting server:", err);
+// }
 
-process.on("uncaughtException", (err) => {
-  console.error("UNCAUGHT EXCEPTION:", err);
-});
+// process.on("uncaughtException", (err) => {
+//   console.error("UNCAUGHT EXCEPTION:", err);
+// });
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("UNHANDLED REJECTION:", reason);
-});
+// process.on("unhandledRejection", (reason, promise) => {
+//   console.error("UNHANDLED REJECTION:", reason);
+// });
 
