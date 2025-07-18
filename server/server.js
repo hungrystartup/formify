@@ -6,10 +6,21 @@ app.use(express.json());
 
 const cors = require('cors');
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || 'https://formify.bluhorizon.work',
+    // CORS configuration
+const corsOptions = {
+    origin: (origin, callback) => {
+        const allowedOrigin = process.env.FRONTEND_URL || 'https://formify.bluhorizon.work';
+        if (origin === allowedOrigin || !origin) {
+            callback(null, true);
+        } else {
+            console.log('CORS blocked for origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
 };
 app.use(cors(corsOptions));
 // Log CORS and cookies for debugging
