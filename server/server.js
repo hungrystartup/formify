@@ -5,8 +5,7 @@ const port = process.env.PORT;
 app.use(express.json());
 
 const cors = require('cors');
-const corsOptions = {
-    // CORS configuration
+// CORS configuration
 const corsOptions = {
     origin: (origin, callback) => {
         const allowedOrigin = process.env.FRONTEND_URL || 'https://formify.bluhorizon.work';
@@ -20,7 +19,6 @@ const corsOptions = {
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-};
 };
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
