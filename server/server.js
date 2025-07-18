@@ -95,6 +95,7 @@ app.post("/signup", async (req, res) => {
             httpOnly: true, // Prevent JavaScript access
             secure: true, // Required for HTTPS and SameSite=None
             sameSite: 'None', // Allow cross-subdomain requests
+            domain: '.bluhorizon.work',
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
 
@@ -131,6 +132,7 @@ app.post("/login", async (req, res) => {
             httpOnly: true, // Prevent JavaScript access
             secure: true, // Required for HTTPS and SameSite=None
             sameSite: 'None', // Allow cross-subdomain requests
+            domain: '.bluhorizon.work',
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
         console.log('Set-Cookie: token=', token);
@@ -323,6 +325,7 @@ app.post("/logout", (req, res) => {
         res.clearCookie('token', {
             httpOnly: true, // Prevent JavaScript access
             secure: true, // Required for HTTPS and SameSite=None
+            domain: '.bluhorizon.work',
             sameSite: 'None', // Allow cross-subdomain requests
         });
         res.status(200).send({ success: true });
