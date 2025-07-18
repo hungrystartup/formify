@@ -6,7 +6,7 @@ app.use(express.json());
 
 const cors = require('cors');
 const corsOptions = {
-    origin: 'http://localhost:5500',
+    origin: 'https://formify.bluhorizon.work',
     credentials: true,
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -284,9 +284,9 @@ app.get("/api/status", verifyToken, async (req, res) => {
         res.status(400).send({ success: false, error: err.message });
     }
 });
-app.get("/", verifyToken, (req, res) => {
-    res.sendFile(__dirname + "/public/index.html");
-});
+// app.get("/", verifyToken, (req, res) => {
+//     res.sendFile(__dirname + "/public/index.html");
+// });
 //getting the username
 app.get("/username", verifyToken, async (req, res) => {
     try {
