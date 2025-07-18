@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 require('dotenv').config();
 const port = process.env.PORT;
 app.use(express.json());
@@ -45,8 +47,7 @@ const pool = mysql.createPool({
 const sanitizeHtml = require('sanitize-html');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
+
 
 function verifyToken(req, res, next) {
     const token = req.cookies.token;
