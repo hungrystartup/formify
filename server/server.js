@@ -6,12 +6,18 @@ app.use(express.json());
 
 const cors = require('cors');
 const corsOptions = {
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || 'https://formify.bluhorizon.work',
     credentials: true,
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));
+// Log CORS and cookies for debugging
+app.use((req, res, next) => {
+    console.log('Request Origin:', req.get('Origin'));
+    console.log('Cookies:', req.cookies);
+    next();
+});
 app.use(express.urlencoded({ extended: true }));
 const mysql = require('mysql2/promise');
 const pool = mysql.createPool({
@@ -115,7 +121,7 @@ app.post("/login", async (req, res) => {
             domain: '.formify.bluhorizon.work', // Share cookie across subdomains
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
-
+        console.log('Set-Cookie: token=', token);
         res.status(200).send({ success: true });
     } catch (err) {
         console.error(err.message);
