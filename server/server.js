@@ -1,8 +1,25 @@
-const express = require('express');
-const app = express();
+console.log("Initializing minimal server.js...");
+  try {
+      const express = require('express');
+      console.log("Express loaded successfully");
+      const app = express();
+      const port = process.env.PORT || 3000;
+
+      app.get('/', (req, res) => {
+          console.log("Handling GET / request");
+          res.send('Hello from Render!');
+      });
+
+      app.listen(port, () => console.log(`Server running on port ${port}`));
+  } catch (err) {
+      console.error("Startup error:", err.message);
+      process.exit(1);
+  }
+// const express = require('express');
+// const app = express();
 // require('dotenv').config();
 // const port = process.env.PORT;
-app.use(express.json());
+// app.use(express.json());
 
 // const cors = require('cors');
 // const corsOptions = {
@@ -358,9 +375,7 @@ app.use(express.json());
 // });
 
 // app.use(express.static('public'));
-app.listen(port, () => {
-    console.log(`✅ Server running on port ${port}`);
-  });
+
 // try {
 //   app.listen(port, () => {
 //     console.log(`✅ Server running on port ${port}`);
