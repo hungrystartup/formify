@@ -23,10 +23,14 @@ const corsOptions = {
 };
 };
 app.use(cors(corsOptions));
-// Log CORS and cookies for debugging
 app.use((req, res, next) => {
     console.log('Request Origin:', req.get('Origin'));
     console.log('Cookies:', req.cookies);
+    const originalSend = res.send;
+    res.send = function (body) {
+        console.log('Response Headers:', res.getHeaders());
+        return originalSend.call(this, body);
+    };
     next();
 });
 app.use(express.urlencoded({ extended: true }));
