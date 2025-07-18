@@ -72,10 +72,11 @@ app.post("/signup", async (req, res) => {
         );
 
         res.cookie('token', token, {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: true,
-            maxAge: 60 * 60 * 1000 // 1 hour
+            httpOnly: true, // Prevent JavaScript access
+            secure: true, // Required for HTTPS and SameSite=None
+            sameSite: 'None', // Allow cross-subdomain requests
+            domain: '.formify.bluhorizon.work', // Share cookie across subdomains
+            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
 
         res.status(200).send({ success: true, message: "Sign up successful" });
@@ -108,10 +109,11 @@ app.post("/login", async (req, res) => {
         );
 
         res.cookie('token', token, {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: true,
-            maxAge: 60 * 60 * 1000 // 1 hour
+            httpOnly: true, // Prevent JavaScript access
+            secure: true, // Required for HTTPS and SameSite=None
+            sameSite: 'None', // Allow cross-subdomain requests
+            domain: '.formify.bluhorizon.work', // Share cookie across subdomains
+            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
 
         res.status(200).send({ success: true });
@@ -301,9 +303,10 @@ app.get("/username", verifyToken, async (req, res) => {
 app.post("/logout", (req, res) => {
     try {
         res.clearCookie('token', {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: true,
+            httpOnly: true, // Prevent JavaScript access
+            secure: true, // Required for HTTPS and SameSite=None
+            sameSite: 'None', // Allow cross-subdomain requests
+            domain: '.formify.bluhorizon.work', // Share cookie across subdomains
         });
         res.status(200).send({ success: true });
     } catch (err) {
