@@ -61,7 +61,9 @@ function verifyToken(req, res, next) {
         return res.status(401).json({ error: "Invalid token" });
     }
 }
-
+app.get("/ping", (req, res) => {
+    res.status(200).send({success: true});
+});
 app.post("/signup", async (req, res) => {
     const { name, email, password } = req.body;
 
