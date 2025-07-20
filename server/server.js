@@ -220,6 +220,7 @@ app.get("/api/limit", verifyToken, async (req, res) => {
 });
 
 app.post("/submit/:apikey", async (req, res) => {
+    const referrer = req.get('referer');
     const { apikey } = req.params;
     const { email, message, _redirect } = req.body;
 
@@ -256,8 +257,8 @@ app.post("/submit/:apikey", async (req, res) => {
         }
 
         await pool.execute(
-            "INSERT INTO messages (user_id, content, submitted_email) VALUES (?, ?, ?)",
-            [user.id, cleanMessage, cleanEmail]
+            "INSERT INTO messages (user_id, content, submitted_email, site_url) VALUES (?, ?, ?, ?)",
+            [user.id, cleanMessage, cleanEmail, referrer]
         );
 
         await pool.execute(
@@ -267,7 +268,7 @@ app.post("/submit/:apikey", async (req, res) => {
 
         // Redirect logic
         if (user.status === 0) {
-            return res.redirect("https://formify.bluhorizon.work/thanks.html");
+            return res.redirect("http://127.0.0.1:5500/thanks.html");
         }
 
         if (user.status === 1 && _redirect) {
@@ -283,10 +284,11 @@ app.post("/submit/:apikey", async (req, res) => {
 });
 
 app.get("/api/messages", verifyToken, async (req, res) => {
+    const limit = 5;
     try {
         const [messages] = await pool.execute(
-            "SELECT id, content, received_at FROM messages WHERE user_id = ? ORDER BY received_at DESC",
-            [req.user.id]
+            "SELECT id, content, received_at, site_url FROM messages WHERE user_id = ? ORDER BY received_at DESC LIMIT ?",
+            [req.user.id, limit]
         );
 
         res.status(200).json({ success: true, messages });
@@ -294,6 +296,21 @@ app.get("/api/messages", verifyToken, async (req, res) => {
     } catch (err) {
         console.error("Fetch messages error:", err);
         res.status(500).json({ error: "Server error" });
+    }
+});
+
+app.get("/api/message", verifyToken, async (req, res) => {
+    const limit = parseInt(req.query.limit) || 4;
+    const offset = parseInt(req.query.offset) || 0;
+
+    try {
+        const [messages] = await pool.query("SELECT id, content, received_at, site_url FROM messages WHERE user_id = ? ORDER BY received_at DESC LIMIT ? OFFSET ?", [req.user.id, limit, offset]);
+
+        res.status(200).send({success: true, messages});
+
+    } catch (err) {
+        console.log(err.message);
+        res.status(400).send({ success: false, error: err.message });
     }
 });
 app.get("/api/status", verifyToken, async (req, res) => {
