@@ -285,34 +285,48 @@ app.post("/submit/:apikey", async (req, res) => {
 
 app.get("/api/messages", verifyToken, async (req, res) => {
     const limit = 5;
+
     try {
-        const [messages] = await pool.execute(
-            "SELECT id, content, received_at, site_url FROM messages WHERE user_id = ? ORDER BY received_at DESC LIMIT ?",
-            [req.user.id, limit]
-        );
+        const sql = `
+            SELECT id, content, received_at, site_url
+            FROM messages
+            WHERE user_id = ?
+            ORDER BY received_at DESC
+            LIMIT ${limit}
+        `;
+
+        const [messages] = await pool.query(sql, [req.user.id]);
 
         res.status(200).json({ success: true, messages });
-
     } catch (err) {
         console.error("Fetch messages error:", err);
         res.status(500).json({ error: "Server error" });
     }
 });
 
+
 app.get("/api/message", verifyToken, async (req, res) => {
     const limit = parseInt(req.query.limit) || 4;
     const offset = parseInt(req.query.offset) || 0;
 
     try {
-        const [messages] = await pool.query("SELECT id, content, received_at, site_url FROM messages WHERE user_id = ? ORDER BY received_at DESC LIMIT ? OFFSET ?", [req.user.id, limit, offset]);
+        const sql = `
+            SELECT id, content, received_at, site_url
+            FROM messages
+            WHERE user_id = ?
+            ORDER BY received_at DESC
+            LIMIT ${limit} OFFSET ${offset}
+        `;
 
-        res.status(200).send({success: true, messages});
+        const [messages] = await pool.query(sql, [req.user.id]);
 
+        res.status(200).send({ success: true, messages });
     } catch (err) {
         console.log(err.message);
         res.status(400).send({ success: false, error: err.message });
     }
 });
+
 app.get("/api/status", verifyToken, async (req, res) => {
     try {
         const [rows] = await pool.execute("SELECT status FROM users WHERE id = ? ", [req.user.id]);
