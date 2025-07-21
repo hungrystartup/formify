@@ -268,7 +268,7 @@ app.post("/submit/:apikey", async (req, res) => {
 
         // Redirect logic
         if (user.status === 0) {
-            return res.redirect("http://127.0.0.1:5500/thanks.html");
+            return res.redirect("https://formify.bluhorizon.work/thanks.html");
         }
 
         if (user.status === 1 && _redirect) {
