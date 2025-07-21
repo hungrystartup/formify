@@ -64,7 +64,7 @@ function verifyToken(req, res, next) {
 app.get("/ping", (req, res) => {
     res.status(200).send({success: true});
 });
-app.post("/signup", async (req, res) => {
+app.post("/signup", rateLimiterMiddleware, async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
@@ -108,7 +108,7 @@ app.post("/signup", async (req, res) => {
     }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login", rateLimiterMiddleware, async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -219,7 +219,7 @@ app.get("/api/limit", verifyToken, async (req, res) => {
     }
 });
 
-app.post("/submit/:apikey", async (req, res) => {
+app.post("/submit/:apikey", rateLimiterMiddleware, async (req, res) => {
     const referrer = req.get('referer');
     const { apikey } = req.params;
     const { email, message, _redirect } = req.body;
