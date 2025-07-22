@@ -2,8 +2,6 @@ const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
-const { connectRedis } = require('./redis');
-const createRateLimiter = require('./rateLimiter');
 require('dotenv').config();
 const port = process.env.PORT;
 app.use(express.json());
@@ -66,11 +64,7 @@ function verifyToken(req, res, next) {
 app.get("/ping", (req, res) => {
     res.status(200).send({success: true});
 });
-(async () => {
-  await connectRedis();
-
-  const rateLimiter = createRateLimiter();
-app.post("/signup", rateLimiter, async (req, res) => {
+app.post("/signup", async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
@@ -114,7 +108,7 @@ app.post("/signup", rateLimiter, async (req, res) => {
     }
 });
 
-app.post("/login", rateLimiter, async (req, res) => {
+app.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -150,71 +144,6 @@ app.post("/login", rateLimiter, async (req, res) => {
         res.status(400).send({ success: false, error: err.message });
     }
 });
-
-app.post("/submit/:apikey", rateLimiter, async (req, res) => {
-    const referrer = req.get('referer');
-    const { apikey } = req.params;
-    const { email, message, _redirect } = req.body;
-
-    if (!email || !message) {
-        return res.status(400).json({ success: false, error: "Message content or email is required" });
-    }
-
-    // Sanitize input
-    const cleanEmail = sanitizeHtml(email.trim(), {
-        allowedTags: [],
-        allowedAttributes: {}
-    });
-
-    const cleanMessage = sanitizeHtml(message.trim(), {
-        allowedTags: [],
-        allowedAttributes: {}
-    });
-
-    // Basic email format validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-        return res.status(400).json({ success: false, error: "Invalid email format" });
-    }
-
-    try {
-        const [[user]] = await pool.execute(
-            "SELECT id, email, max_message, current_message, status FROM users WHERE api_key = ?",
-            [apikey]
-        );
-
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        if (user.current_message >= user.max_message) {
-            return res.status(403).json({ error: "Message limit reached" });
-        }
-
-        await pool.execute(
-            "INSERT INTO messages (user_id, content, submitted_email, site_url) VALUES (?, ?, ?, ?)",
-            [user.id, cleanMessage, cleanEmail, referrer]
-        );
-
-        await pool.execute(
-            "UPDATE users SET current_message = current_message + 1, total_messages = total_messages + 1 WHERE id = ?",
-            [user.id]
-        );
-
-        // Redirect logic
-        if (user.status === 0) {
-            return res.redirect("https://formify.bluhorizon.work/thanks.html");
-        }
-
-        if (user.status === 1 && _redirect) {
-            return res.redirect(_redirect);
-        }
-
-        return res.status(200).json({ success: true, message: "Message received" });
-
-    } catch (err) {
-        console.error("Submit error:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-});
-})();
 
 app.get("/authorize", verifyToken, (req, res) => {
     res.send({ success: true });
@@ -290,6 +219,69 @@ app.get("/api/limit", verifyToken, async (req, res) => {
     }
 });
 
+app.post("/submit/:apikey", async (req, res) => {
+    const referrer = req.get('referer');
+    const { apikey } = req.params;
+    const { email, message, _redirect } = req.body;
+
+    if (!email || !message) {
+        return res.status(400).json({ success: false, error: "Message content or email is required" });
+    }
+
+    // Sanitize input
+    const cleanEmail = sanitizeHtml(email.trim(), {
+        allowedTags: [],
+        allowedAttributes: {}
+    });
+
+    const cleanMessage = sanitizeHtml(message.trim(), {
+        allowedTags: [],
+        allowedAttributes: {}
+    });
+
+    // Basic email format validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return res.status(400).json({ success: false, error: "Invalid email format" });
+    }
+
+    try {
+        const [[user]] = await pool.execute(
+            "SELECT id, email, max_message, current_message, status FROM users WHERE api_key = ?",
+            [apikey]
+        );
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        if (user.current_message >= user.max_message) {
+            return res.status(403).json({ error: "Message limit reached" });
+        }
+
+        await pool.execute(
+            "INSERT INTO messages (user_id, content, submitted_email, site_url) VALUES (?, ?, ?, ?)",
+            [user.id, cleanMessage, cleanEmail, referrer]
+        );
+
+        await pool.execute(
+            "UPDATE users SET current_message = current_message + 1, total_messages = total_messages + 1 WHERE id = ?",
+            [user.id]
+        );
+
+        // Redirect logic
+        if (user.status === 0) {
+            return res.redirect("https://formify.bluhorizon.work/thanks.html");
+        }
+
+        if (user.status === 1 && _redirect) {
+            return res.redirect(_redirect);
+        }
+
+        return res.status(200).json({ success: true, message: "Message received" });
+
+    } catch (err) {
+        console.error("Submit error:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
 
 app.get("/api/messages", verifyToken, async (req, res) => {
     const limit = 5;
@@ -418,9 +410,5 @@ app.get("/api/message-stats", verifyToken, async (req, res) => {
         res.status(500).json({ success: false, error: "Server error" });
     }
 });
-(async () => {
-    await connectRedis(); // Ensure Redis is connected first
-    app.listen(port, () => console.log(`Server running on ${port}`));
-})();
 
-// app.listen(port, () => console.log(`Connection started on port: ${port}`));
+app.listen(port, () => console.log(`Connection started on port: ${port}`));
