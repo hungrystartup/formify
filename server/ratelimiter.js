@@ -3,28 +3,27 @@ const { redisClient } = require('./redis');
 
 let rateLimiter;
 
-if (redisClient.isReady) {
+function createRateLimiter() {
+    if (!redisClient.isReady) {
+        throw new Error("Redis is not ready. Connect before initializing rate limiter.");
+    }
+
     rateLimiter = new RateLimiterRedis({
         storeClient: redisClient,
         points: 100,
         duration: 3600,
         keyPrefix: 'rl'
     });
-    console.log("Rate limiter initialized.");
-} else {
-    console.warn("Redis is not ready. Rate limiter is disabled.");
+
+    return async function rateLimitMiddleware(req, res, next) {
+        const apikey = req.headers['x-api-key'] || 'anonymous';
+        try {
+            await rateLimiter.consume(apikey);
+            next();
+        } catch (err) {
+            res.status(429).send({ err: 'Too many requests', message: 'Rate limit exceeded, please try again later' });
+        }
+    };
 }
 
-const rateLimitMiddleware = async (req, res, next) => {
-    const apikey = req.headers['x-api-key'] || 'anonymous';
-    try {
-        if (rateLimiter) {
-            await rateLimiter.consume(apikey);
-        }
-        next();
-    } catch (err) {
-        res.status(429).send({ err: 'Too many requests', message: 'Rate limit exceeded, please try again later' });
-    }
-};
-
-module.exports = rateLimitMiddleware;
+module.exports = createRateLimiter;
