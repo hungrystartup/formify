@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+const { redisClient, connectRedis } = require('./redis');
 const rateLimiterMiddleware = require('./ratelimiter');
 require('dotenv').config();
 const port = process.env.PORT;
@@ -411,5 +412,9 @@ app.get("/api/message-stats", verifyToken, async (req, res) => {
         res.status(500).json({ success: false, error: "Server error" });
     }
 });
+(async () => {
+    await connectRedis(); // Ensure Redis is connected first
+    app.listen(port, () => console.log(`Server running on ${port}`));
+})();
 
-app.listen(port, () => console.log(`Connection started on port: ${port}`));
+// app.listen(port, () => console.log(`Connection started on port: ${port}`));
