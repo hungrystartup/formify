@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+const rateLimiterMiddleware = require('./ratelimiter');
 require('dotenv').config();
 const port = process.env.PORT;
 app.use(express.json());
