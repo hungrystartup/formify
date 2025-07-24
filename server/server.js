@@ -253,7 +253,7 @@ app.post("/submit/:apikey", async (req, res) => {
         if (!user) return res.status(404).json({ error: "User not found" });
 
         if (user.current_message >= user.max_message) {
-            return res.status(403).json({ error: "Message limit reached" });
+           return res.redirect(`${process.env.FRONTEND_URL}/limitreached.html`);
         }
 
         await pool.execute(
@@ -268,7 +268,7 @@ app.post("/submit/:apikey", async (req, res) => {
 
         // Redirect logic
         if (user.status === 0) {
-            return res.redirect("https://formify.bluhorizon.work/thanks.html");
+             return res.redirect(`${process.env.FRONTEND_URL}/thanks.html`);
         }
 
         if (user.status === 1 && _redirect) {
@@ -411,4 +411,21 @@ app.get("/api/message-stats", verifyToken, async (req, res) => {
     }
 });
 
+app.get('/delete', verifyToken, async(req, res) => {
+    const id = req.query.id;
+    try{
+
+        const [[ user ]] = await pool.execute("SELECT status FROM users WHERE id = ? ", [req.user.id]);
+        if(user.length == 0) return res.status(400).send({success: false, error: "User does not exist"});
+
+        if (user.status == 0) return res.status(401).send({success: false, error: "Only premium users can delete messages"});
+        
+        await pool.execute("DELETE FROM messages WHERE id = ?", [id]);
+        await pool.execute( "UPDATE users SET current_message = current_message - 1, total_messages = total_messages - 1 WHERE id = ?",
+            [req.user.id])
+        res.status(200).send({success: true, message: "Message successfully deleted"});
+    }catch(err){
+        console.log(err.message);
+    }
+});
 app.listen(port, () => console.log(`Connection started on port: ${port}`));
