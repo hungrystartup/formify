@@ -47,7 +47,11 @@ const pool = mysql.createPool({
 const sanitizeHtml = require('sanitize-html');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { redisClient, connectRedis } = require('./redis.js');
+const rateLimiter = require('./ratelimiter.js');
 
+// connect once globally on server start
+connectRedis();
 
 function verifyToken(req, res, next) {
     const token = req.cookies.token;
@@ -64,7 +68,7 @@ function verifyToken(req, res, next) {
 app.get("/ping", (req, res) => {
     res.status(200).send({success: true});
 });
-app.post("/signup", async (req, res) => {
+app.post("/signup", rateLimiter, async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
@@ -108,7 +112,7 @@ app.post("/signup", async (req, res) => {
     }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login", rateLimiter, async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -219,7 +223,7 @@ app.get("/api/limit", verifyToken, async (req, res) => {
     }
 });
 
-app.post("/submit/:apikey", async (req, res) => {
+app.post("/submit/:apikey", rateLimiter, async (req, res) => {
     const referrer = req.get('referer');
     const { apikey } = req.params;
     const { email, message, _redirect } = req.body;
@@ -353,7 +357,7 @@ app.get("/username", verifyToken, async (req, res) => {
     }
 });
 
-app.post("/logout", (req, res) => {
+app.post("/logout", rateLimiter, (req, res) => {
     try {
         res.clearCookie('token', {
             httpOnly: true, // Prevent JavaScript access
