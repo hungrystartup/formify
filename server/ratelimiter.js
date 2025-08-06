@@ -1,29 +1,31 @@
-const { RateLimiterRedis } = require('rate-limiter-flexible');
-const { redisClient } = require('./redis');
+const { redisClient, connectRedis } = require('./redis.js');
 
-let rateLimiter;
+module.exports = async function rateLimiter(req, res, next) {
+    const apiKey = req.headers['x-api-key'] || 'anonymous';
+    const key = `rate-limit:${apiKey}`;
+    const limit = 100;
+    const windowInSeconds = 3600;
 
-function createRateLimiter() {
-    if (!redisClient.isReady) {
-        throw new Error("Redis is not ready. Connect before initializing rate limiter.");
-    }
+    try {
+        await connectRedis(); // 👈 Ensure Redis is connected before using
 
-    rateLimiter = new RateLimiterRedis({
-        storeClient: redisClient,
-        points: 100,
-        duration: 3600,
-        keyPrefix: 'rl'
-    });
+        let current = await redisClient.get(key);
 
-    return async function rateLimitMiddleware(req, res, next) {
-        const apikey = req.headers['x-api-key'] || 'anonymous';
-        try {
-            await rateLimiter.consume(apikey);
-            next();
-        } catch (err) {
-            res.status(429).send({ err: 'Too many requests', message: 'Rate limit exceeded, please try again later' });
+        if (current !== null && parseInt(current) >= limit) {
+            return res.status(429).send({ error: "Rate limit exceeded. Try again later" });
         }
-    };
-}
 
-module.exports = createRateLimiter;
+        const pipeline = redisClient.multi();
+        pipeline.incr(key);
+
+        if (current === null) {
+            pipeline.expire(key, windowInSeconds);
+        }
+
+        await pipeline.exec();
+        next();
+    } catch (err) {
+        console.error("Rate limiter error", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
