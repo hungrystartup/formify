@@ -292,7 +292,7 @@ app.get("/api/messages", verifyToken, async (req, res) => {
 
     try {
         const sql = `
-            SELECT id, content, received_at, site_url
+            SELECT id, submitted_email, content, received_at, site_url
             FROM messages
             WHERE user_id = ?
             ORDER BY received_at DESC
