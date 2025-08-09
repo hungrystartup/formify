@@ -10,7 +10,7 @@ const cors = require('cors');
 // CORS configuration
 const corsOptions = {
     origin: (origin, callback) => {
-        const allowedOrigin = process.env.FRONTEND_URL || 'https://formify.bluhorizon.work';
+        const allowedOrigin = '*';
         if (origin === allowedOrigin || !origin) {
             callback(null, true);
         } else {
