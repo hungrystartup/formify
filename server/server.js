@@ -5,8 +5,6 @@ app.use(cookieParser());
 require('dotenv').config();
 const port = process.env.PORT;
 app.use(express.json());
-
-const cors = require('cors');
 // CORS configuration
 const cors = require('cors');
 
