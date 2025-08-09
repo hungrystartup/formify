@@ -9,7 +9,7 @@ app.use(express.json());
 const cors = require('cors');
 
 const allowedOrigins = [
-    'https://yourfrontend.com',
+    'https://fomify.bluhorizon.work',
     'http://localhost:3000'
 ];
 
