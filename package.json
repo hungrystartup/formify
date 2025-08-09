@@ -2,7 +2,7 @@
   "name": "formify-backend",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server/server.js",
+    "start": "node src/server.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

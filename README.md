@@ -40,7 +40,7 @@ A robust Node.js backend API for handling form submissions with authentication, 
 2. **Install dependencies**
    ```bash
    npm install
-   cd server && npm install
+   cd src && npm install
    ```
 
 3. **Set up environment variables**
@@ -62,7 +62,7 @@ A robust Node.js backend API for handling form submissions with authentication, 
 
 4. **Set up the database**
    ```bash
-   node db.js
+   node src/db.js
    ```
 
 ## Usage
