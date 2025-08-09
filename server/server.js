@@ -9,7 +9,7 @@ app.use(express.json());
 const cors = require('cors');
 
 const allowedOrigins = [
-    'https://formify.bluhorizon.work',
+    process.env.FRONTEND_URL,
     'http://localhost:3000'
 ];
 
