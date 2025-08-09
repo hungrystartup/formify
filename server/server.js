@@ -5,33 +5,20 @@ app.use(cookieParser());
 require('dotenv').config();
 const port = process.env.PORT;
 app.use(express.json());
-// CORS configuration
+
+// CORS configuration - Allow all origins while preserving cookies
 const cors = require('cors');
 
-const allowedOrigins = process.env.FRONTEND_URL,
-
 app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true, // must be true for cookies
+    origin: true, // Allow all origins
+    credentials: true, // Must be true for cookies
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Very important: handle OPTIONS preflight
+// Handle OPTIONS preflight for all routes
 app.options('*', cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true,
     credentials: true,
 }));
 

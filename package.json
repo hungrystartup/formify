@@ -2,7 +2,7 @@
   "name": "formify-backend",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server/server.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
