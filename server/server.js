@@ -262,8 +262,8 @@ app.post("/v1/submit/:apikey", rateLimiter, async (req, res) => {
         }
 
         await pool.execute(
-            "INSERT INTO messages (user_id, content, submitted_email, safeReferrer) VALUES (?, ?, ?, ?)",
-            [user.id, cleanMessage, cleanEmail, referrer]
+            "INSERT INTO messages (user_id, content, submitted_email, site_url) VALUES (?, ?, ?, ?)",
+            [user.id, cleanMessage, cleanEmail, safeReferrer]
         );
 
         await pool.execute(
