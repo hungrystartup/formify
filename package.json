@@ -2,7 +2,9 @@
   "name": "formify-backend",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server/server.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -14,5 +16,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.9.3",
     "sanitize-html": "^2.12.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
   }
 }
