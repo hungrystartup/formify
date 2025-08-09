@@ -8,31 +8,15 @@ app.use(express.json());
 
 const cors = require('cors');
 // CORS configuration
-const corsOptions = {
-    origin: (origin, callback) => {
-        const allowedOrigin = '*';
-        if (origin === allowedOrigin || !origin) {
-            callback(null, true);
-        } else {
-            console.log('CORS blocked for origin:', origin);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+const cors = require('cors');
+
+app.use(cors({
+    origin: '*',
     credentials: false,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-};
-app.use(cors(corsOptions));
-app.use((req, res, next) => {
-    console.log('Request Origin:', req.get('Origin'));
-    console.log('Cookies:', req.cookies);
-    const originalSend = res.send;
-    res.send = function (body) {
-        console.log('Response Headers:', res.getHeaders());
-        return originalSend.call(this, body);
-    };
-    next();
-});
+}));
+
 app.use(express.urlencoded({ extended: true }));
 const mysql = require('mysql2/promise');
 const pool = mysql.createPool({
