@@ -225,6 +225,7 @@ app.get("/api/limit", verifyToken, async (req, res) => {
 
 app.post("/v1/submit/:apikey", rateLimiter, async (req, res) => {
     const referrer = req.get('referer');
+    const safeReferrer = (referrer || "").substring(0, 255);
     const { apikey } = req.params;
     const { email, message, _redirect } = req.body;
 
@@ -261,7 +262,7 @@ app.post("/v1/submit/:apikey", rateLimiter, async (req, res) => {
         }
 
         await pool.execute(
-            "INSERT INTO messages (user_id, content, submitted_email, site_url) VALUES (?, ?, ?, ?)",
+            "INSERT INTO messages (user_id, content, submitted_email, safeReferrer) VALUES (?, ?, ?, ?)",
             [user.id, cleanMessage, cleanEmail, referrer]
         );
 
