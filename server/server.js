@@ -283,9 +283,12 @@ app.post("/v1/submit/:apikey", rateLimiter, async (req, res) => {
         return res.status(200).json({ success: true, message: "Message received" });
 
     } catch (err) {
-        console.error("Submit error:", err);
-        res.status(500).json({ error: "Server error" });
-    }
+    console.error("MySQL Submit error:", err); // full error object
+    res.status(500).json({ 
+        error: "Server error", 
+        details: err.sqlMessage || err.message 
+    });
+}
 });
 
 app.get("/api/messages", verifyToken, async (req, res) => {
