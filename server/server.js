@@ -223,7 +223,7 @@ app.get("/api/limit", verifyToken, async (req, res) => {
     }
 });
 
-app.post("v1/submit/:apikey", rateLimiter, async (req, res) => {
+app.post("/v1/submit/:apikey", rateLimiter, async (req, res) => {
     const referrer = req.get('referer');
     const { apikey } = req.params;
     const { email, message, _redirect } = req.body;
