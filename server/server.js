@@ -8,8 +8,20 @@ app.use(express.json());
 // CORS configuration
 const cors = require('cors');
 
+const allowedOrigins = [
+    'https://yourfrontend.com',
+    'http://localhost:3000'
+];
+
 app.use(cors({
-    origin: '*',
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
