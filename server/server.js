@@ -9,7 +9,7 @@ app.use(express.json());
 const cors = require('cors');
 
 const allowedOrigins = [
-    'https://fomify.bluhorizon.work',
+    'https://formify.bluhorizon.work',
     'http://localhost:3000'
 ];
 
@@ -21,9 +21,21 @@ app.use(cors({
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true,
+    credentials: true, // must be true for cookies
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Very important: handle OPTIONS preflight
+app.options('*', cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
 }));
 
 app.use(express.urlencoded({ extended: true }));
